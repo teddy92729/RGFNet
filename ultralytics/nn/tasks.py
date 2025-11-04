@@ -267,7 +267,7 @@ class BaseModel(nn.Module):
             else:
                 if isinstance(m, DecomNet1):
                     params = dict()
-                    pretrain = torch.load('/data/zhangwei/yolov8_multi/decomp.pth',map_location='cpu')
+                    pretrain = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
                     for k, v in pretrain.items():
                         newk = k[9:]
                         params[newk] = v
@@ -276,7 +276,7 @@ class BaseModel(nn.Module):
                     
                 if isinstance(m, DecomNet2):
                     params = dict()
-                    pretrain = torch.load('/data/zhangwei/yolov8_multi/decomp.pth',map_location='cpu')
+                    pretrain = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
                     for k, v in pretrain.items():
                         newk = k[9:]
                         params[newk] = v
