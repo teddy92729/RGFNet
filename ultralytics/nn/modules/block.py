@@ -2,7 +2,7 @@
 """Block modules."""
 
 import sys
-sys.path.append('/data/zhangwei/yolov8_multi/Burstormer-main/Burst De-noising')
+sys.path.append('/root/RGFNet/Burstormer-main/Burst De-noising')
 from utils.metrics import PSNR
 psnr_fn = PSNR(boundary_ignore=40)
 
@@ -49,6 +49,14 @@ __all__ = ('DFL', 'HGBlock', 'HGStem', 'SPP', 'SPPF', 'C1', 'C2', 'C3', 'C2f', '
            'MF', 'Add','Add2','Add5', 'SelfAttention', 'myTransformerBlock', 'GPT', 'mutual_alignment', 'mutual_alignment1', 
            'mutual_alignment2','alignment', 'alignment1', 'alignment2', 'Concat3', 'VSS', 'VSS0', 'VSS1', 'VSS2', 'VSS3','VSS4',
            'DecomNet1','DecomNet2', 'MambaBlock','MambaBlock1','MambaBlock2','mutual_align1','mutual_align2')
+
+class alignment(nn.Module): pass
+class alignment1(nn.Module): pass
+class alignment2(nn.Module): pass
+class VSS(nn.Module): pass
+class VSS0(nn.Module): pass
+class VSS3(nn.Module): pass
+class MambaBlock2(nn.Module): pass
 
 def autopad(k, p=None, d=1):  # kernel, padding, dilation
     """Pad to 'same' shape outputs."""
@@ -113,6 +121,7 @@ class DecomNet1(nn.Module):
         light = (x_im, L, R, L1, L2, L3, L4)
         return light
 
+DecomNet2 = DecomNet1
 
   
 
