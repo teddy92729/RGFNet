@@ -1046,7 +1046,10 @@ def parse_model(d, ch, verbose=True):  # model_dict, input_channels(3)
                 n = 1
         
         elif m is Multiin:
-            c2 = ch[f]//2
+            if args[0] == 1:
+                c2 = 3
+            else:
+                c2 = ch[f] - 3
         elif m is IN3:
             c2 = ch[f]
         elif m is Add:
