@@ -302,7 +302,8 @@ class BaseModel(nn.Module):
                                 tensor = tensor.squeeze(0)
                             
                             # 确保张量的值在 [0, 1] 范围内
-                            tensor = (tensor - tensor.min()) / (tensor.max() - tensor.min())
+                            # tensor = (tensor - tensor.min()) / (tensor.max() - tensor.min())
+                            tensor = torch.clamp(tensor, 0, 1)
                             
                             # 使用 torchvision.transforms.ToPILImage 将张量转换为 PIL 图像
                             to_pil = transforms.ToPILImage()
