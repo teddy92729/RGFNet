@@ -951,7 +951,17 @@ class Format:
         """Format the image for YOLO from Numpy array to PyTorch tensor."""
         if len(img.shape) < 3:
             img = np.expand_dims(img, -1)
-        img = np.ascontiguousarray(img.transpose(2, 0, 1)[::-1])
+        ### COPY FROM YOLO-MIF
+        if(img.shape[2]==1):
+            img = np.ascontiguousarray(img.transpose(2, 0, 1))
+        elif(img.shape[2]==4):
+            img3c = np.ascontiguousarray(img.transpose(2, 0, 1)[:3, :, :][::-1])
+            img1c = img.transpose(2, 0, 1)[-1:, :, :]
+            img = np.concatenate((img3c, img1c), axis=0)
+            # img = torch.from_numpy(img)
+            # ----------------------------   3 _format_img
+        else:
+            img = np.ascontiguousarray(img.transpose(2, 0, 1)[::-1])
         img = torch.from_numpy(img)
         return img
 
