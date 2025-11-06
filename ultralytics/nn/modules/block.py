@@ -747,12 +747,15 @@ class VSS1(nn.Module): # 四方向选择性扫描操作
         ir = x[1]
         R1 = x[2]
         Just = x[3]
-        Just = torch.tensor(Just,dtype=torch.float32).unsqueeze(-1).unsqueeze(-1).cuda()
+        Just = Just.to(rgb.device, dtype=rgb.dtype)
 
 
         B, C, H, W = rgb.shape
         L = H * W
         K = 4
+
+        Just = F.interpolate(Just, size=(H, W), mode='bilinear', align_corners=False)
+        Just = Just.expand_as(rgb)
 # RGB
 ###---------------------------------------------------------------------------------------------------------------------------------####
         # 数据处理：
@@ -849,9 +852,13 @@ class VSS1(nn.Module): # 四方向选择性扫描操作
 # RGB
 ###---------------------------------------------------------------------------------------------------------------------------------####
         
+        x_hwwhJust = torch.stack([Just.view(B, -1, L), torch.transpose(Just, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
+        xsJust = torch.cat([x_hwwhJust, torch.flip(x_hwwhJust, dims=[-1])], dim=1)
+        dtsJust =  xsJust.view(B, -1, L)
+
         # out_y = self.selective_scan(...): 这行代码调用了一个自定义函数selective_scan，传递了一系列张量作为参数，并返回一个张量out_y。  dts1*Just+dts2+dts3 dts1*Just+dts3
         out_y1 = self.selective_scan1(
-            xs1, dts1*Just+dts3,
+            xs1, dts1*dtsJust+dts3,
             As1, Bs1, Cs1+Cs2+Cs3, Ds1, z=None,
             delta_bias=dt_projs_bias1,
 
