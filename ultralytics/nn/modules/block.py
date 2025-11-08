@@ -157,7 +157,7 @@ class DecomNet2(nn.Module):
         featss   = self.net1_convs(feats0)
         outs     = self.net1_recon(featss)
         R        = torch.sigmoid(outs[:, 0:3, :, :])
-        K        = torch.zeros(b)
+        K        = torch.ones(b)
 
         for i in range(b):           
             x_new[i][(x_new[i])<0.196] = 0.1
@@ -166,8 +166,6 @@ class DecomNet2(nn.Module):
 
             if (x_new[i]*10).sum() / (h*w*3) > 0.18:
                 x_im[i] = R[i]
-                K[i] = 1
-            else:
                 K[i] = 0
        
         light = (x_im, K, R)
