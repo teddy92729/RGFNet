@@ -22,6 +22,7 @@ results = model.train(
     scale=0.0,
     mosaic=0.0,
     save_period=25,
+    ch=4,
     cache="ram",
     deterministic=False,
     name="DV_MBVSS2x3_add_malign_refrgb",
