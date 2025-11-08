@@ -9,25 +9,21 @@ model = YOLO(
 )
 # build from YAML and transfer weights   通过模型配置和预训练模型将预训练模型权重转到模型上
 
-model.model = torch.compile(model.model)
+model.model = torch.compile(model.model, "max-autotune")
 
 # Train the model
 results = model.train(
-    data="datasets/RGBT/DroneVehicle/yolo-mif/data.yaml",
+    data="/root/RGFNet/datasets/yolo-mif/data.yaml",
     epochs=150,
     imgsz=640,
     device=0,
+    workers=16,
     batch=8,
-    hsv_h=0.0,
-    hsv_s=0.0,
-    hsv_v=0.0,
-    translate=0.0,
     scale=0.0,
-    fliplr=0.0,
     mosaic=0.0,
-    erasing=0.0,
-    auto_augment=None,
+    save_period=25,
     cache="ram",
+    deterministic=False,
     name="DV_MBVSS2x3_add_malign_refrgb",
 )
 
