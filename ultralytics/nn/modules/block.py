@@ -121,7 +121,57 @@ class DecomNet1(nn.Module):
         light = (x_im, L, R, L1, L2, L3, L4)
         return light
 
-DecomNet2 = DecomNet1
+class DecomNet2(nn.Module):
+    def __init__(self, channel=64, kernel_size=3):
+        super(DecomNet2, self).__init__()
+        # Shallow feature extraction
+        self.net1_conv0 = nn.Conv2d(4, channel, kernel_size * 3,
+                                    padding=4, padding_mode='replicate')
+        # Activated layers!
+        self.net1_convs = nn.Sequential(nn.Conv2d(channel, channel, kernel_size,
+                                                  padding=1, padding_mode='replicate'),
+                                        nn.ReLU(),
+                                        nn.Conv2d(channel, channel, kernel_size,
+                                                  padding=1, padding_mode='replicate'),
+                                        nn.ReLU(),
+                                        nn.Conv2d(channel, channel, kernel_size,
+                                                  padding=1, padding_mode='replicate'),
+                                        nn.ReLU(),
+                                        nn.Conv2d(channel, channel, kernel_size,
+                                                  padding=1, padding_mode='replicate'),
+                                        nn.ReLU(),
+                                        nn.Conv2d(channel, channel, kernel_size,
+                                                  padding=1, padding_mode='replicate'),
+                                        nn.ReLU())
+        # Final recon layer
+        self.net1_recon = nn.Conv2d(channel, 4, kernel_size,
+                                    padding=1, padding_mode='replicate')
+
+    def forward(self, input_im):
+        b,c,h,w = input_im.shape
+        x_im = input_im
+        x_new = input_im.clone()
+        input_max= torch.max(input_im, dim=1, keepdim=True)[0]
+        input_img= torch.cat((input_max, input_im), dim=1)
+        feats0   = self.net1_conv0(input_img)
+        featss   = self.net1_convs(feats0)
+        outs     = self.net1_recon(featss)
+        R        = torch.sigmoid(outs[:, 0:3, :, :])
+        K        = torch.zeros(b)
+
+        for i in range(b):           
+            x_new[i][(x_new[i])<0.196] = 0.1
+            x_new[i][(x_new[i])>=0.196] = 0
+            
+
+            if (x_new[i]*10).sum() / (h*w*3) > 0.18:
+                x_im[i] = R[i]
+                K[i] = 1
+            else:
+                K[i] = 0
+       
+        light = (x_im, K, R)
+        return light
 
   
 
@@ -747,15 +797,13 @@ class VSS1(nn.Module): # 四方向选择性扫描操作
         ir = x[1]
         R1 = x[2]
         Just = x[3]
-        Just = Just.to(rgb.device, dtype=rgb.dtype)
+        # Just = torch.tensor(Just,dtype=torch.float32).unsqueeze(-1).unsqueeze(-1).cuda()
+        Just = Just.detach().to(rgb.device, dtype=rgb.dtype).unsqueeze(-1).unsqueeze(-1)
 
 
         B, C, H, W = rgb.shape
         L = H * W
         K = 4
-
-        Just = F.interpolate(Just, size=(H, W), mode='bilinear', align_corners=False)
-        Just = Just.expand_as(rgb)
 # RGB
 ###---------------------------------------------------------------------------------------------------------------------------------####
         # 数据处理：
@@ -852,13 +900,9 @@ class VSS1(nn.Module): # 四方向选择性扫描操作
 # RGB
 ###---------------------------------------------------------------------------------------------------------------------------------####
         
-        x_hwwhJust = torch.stack([Just.view(B, -1, L), torch.transpose(Just, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
-        xsJust = torch.cat([x_hwwhJust, torch.flip(x_hwwhJust, dims=[-1])], dim=1)
-        dtsJust =  xsJust.view(B, -1, L)
-
         # out_y = self.selective_scan(...): 这行代码调用了一个自定义函数selective_scan，传递了一系列张量作为参数，并返回一个张量out_y。  dts1*Just+dts2+dts3 dts1*Just+dts3
         out_y1 = self.selective_scan1(
-            xs1, dts1*dtsJust+dts3,
+            xs1, dts1*Just+dts3,
             As1, Bs1, Cs1+Cs2+Cs3, Ds1, z=None,
             delta_bias=dt_projs_bias1,
 
