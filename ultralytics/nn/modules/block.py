@@ -93,6 +93,15 @@ class DecomNet1(nn.Module):
         self.net1_recon = nn.Conv2d(channel, 4, kernel_size,
                                     padding=1, padding_mode='replicate')
 
+        # loading pretrained weights
+        params = dict()
+        pretrained = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
+        # remove prefix key "DecomNet."
+        for k, v in pretrained.items():
+            newk = k[9:]
+            params[newk] = v
+        self.load_state_dict(params)
+
     def forward(self, input_im):
         b,c,h,w = input_im.shape
         x_im = input_im
@@ -147,6 +156,15 @@ class DecomNet2(nn.Module):
         self.net1_recon = nn.Conv2d(channel, 4, kernel_size,
                                     padding=1, padding_mode='replicate')
 
+        # loading pretrained weights
+        params = dict()
+        pretrained = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
+        # remove prefix key "DecomNet."
+        for k, v in pretrained.items():
+            newk = k[9:]
+            params[newk] = v
+        self.load_state_dict(params)
+
     def forward(self, input_im):
         b,c,h,w = input_im.shape
         x_im = input_im
@@ -159,14 +177,12 @@ class DecomNet2(nn.Module):
         R        = torch.sigmoid(outs[:, 0:3, :, :])
         K        = torch.ones(b)
 
-        for i in range(b):           
-            x_new[i][(x_new[i])<0.196] = 0.1
-            x_new[i][(x_new[i])>=0.196] = 0
-            
+        mask = (input_im < 0.196).float().sum(dim=[1,2,3]) > (0.18 * (h*w*3))
+        K[mask] = 0
 
-            if (x_new[i]*10).sum() / (h*w*3) > 0.18:
-                x_im[i] = R[i]
-                K[i] = 0
+        mask = mask.unsqueeze(1).unsqueeze(2).unsqueeze(3).expand_as(x_im)
+        # unkown R dtype is float16
+        x_im[mask] = R[mask].to(x_im.dtype)
        
         light = (x_im, K, R)
         return light

@@ -265,25 +265,12 @@ class BaseModel(nn.Module):
                     else:
                         x = m(x)
             else:
-                if isinstance(m, DecomNet1):
-                    params = dict()
-                    pretrain = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
-                    for k, v in pretrain.items():
-                        newk = k[9:]
-                        params[newk] = v
-                    m.load_state_dict(params)
-                    # m.load_state_dict(params,strict=False)
-                    
-                if isinstance(m, DecomNet2):
-                    params = dict()
-                    pretrain = torch.load('/root/RGFNet/decomp.pth',map_location='cpu')
-                    for k, v in pretrain.items():
-                        newk = k[9:]
-                        params[newk] = v
-                    m.load_state_dict(params)
-                    # m.load_state_dict(params,strict=False)
-
                 x = m(x)  # run
+                if isinstance(m, (DecomNet1, DecomNet2)):
+                    x = list(x)
+                    for i in range(len(x)):
+                        # Freeze the DecomNet during training
+                        x[i] = x[i].detach() 
 
                 if isinstance(m, DecomNet2): 
                     if x[0].size(0) > 1 and not self.print:
