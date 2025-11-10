@@ -569,17 +569,17 @@ def plot_images(images,
                 save=True):
     """Plot image grid with labels."""
     if isinstance(images, torch.Tensor):
-        images = images.cpu().float().numpy()
+        images = images.detach().cpu().float().numpy()
     if isinstance(cls, torch.Tensor):
-        cls = cls.cpu().numpy()
+        cls = cls.detach().cpu().numpy()
     if isinstance(bboxes, torch.Tensor):
-        bboxes = bboxes.cpu().numpy()
+        bboxes = bboxes.detach().cpu().numpy()
     if isinstance(masks, torch.Tensor):
-        masks = masks.cpu().numpy().astype(int)
+        masks = masks.detach().cpu().numpy().astype(int)
     if isinstance(kpts, torch.Tensor):
-        kpts = kpts.cpu().numpy()
+        kpts = kpts.detach().cpu().numpy()
     if isinstance(batch_idx, torch.Tensor):
-        batch_idx = batch_idx.cpu().numpy()
+        batch_idx = batch_idx.detach().cpu().numpy()
 
     max_size = 1920  # max image size
     bs, _, h, w = images.shape  # batch size, _, height, width
