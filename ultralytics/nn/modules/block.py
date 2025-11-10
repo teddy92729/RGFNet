@@ -168,7 +168,6 @@ class DecomNet2(nn.Module):
     @torch.no_grad()
     def forward(self, input_im):
         b,c,h,w = input_im.shape
-        x_im = input_im.detach()
         input_max= torch.max(input_im, dim=1, keepdim=True)[0]
         input_img= torch.cat((input_max, input_im), dim=1)
         feats0   = self.net1_conv0(input_img)
@@ -180,9 +179,8 @@ class DecomNet2(nn.Module):
         mask = (input_im < 0.196).float().sum(dim=[1,2,3]) > (0.18 * (h*w*3))
         K[mask] = 0
 
-        mask = mask.unsqueeze(1).unsqueeze(2).unsqueeze(3).expand_as(x_im)
-        # unkown R dtype is float16
-        x_im[mask] = R[mask].to(x_im.dtype)
+        mask = mask.unsqueeze(1).unsqueeze(2).unsqueeze(3).expand_as(input_im)
+        x_im = torch.where(mask, input_im, R)
        
         light = (x_im, K, R)
         return light
