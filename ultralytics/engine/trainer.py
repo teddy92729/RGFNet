@@ -18,6 +18,7 @@ import numpy as np
 import torch
 from torch import distributed as dist
 from torch import nn, optim
+import gc
 
 from ultralytics.cfg import get_cfg, get_save_dir
 from ultralytics.data.utils import check_cls_dataset, check_det_dataset
@@ -413,6 +414,7 @@ class BaseTrainer:
                     self.stop |= epoch >= self.epochs  # stop if exceeded epochs
                 self.scheduler.step()
             self.run_callbacks('on_fit_epoch_end')
+            gc.collect()
             torch.cuda.empty_cache()  # clear GPU memory at end of epoch, may help reduce CUDA out of memory errors
 
             # Early Stopping
@@ -431,6 +433,7 @@ class BaseTrainer:
             if self.args.plots:
                 self.plot_metrics()
             self.run_callbacks('on_train_end')
+        gc.collect()
         torch.cuda.empty_cache()
         self.run_callbacks('teardown')
 
