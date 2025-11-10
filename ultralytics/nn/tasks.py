@@ -266,11 +266,6 @@ class BaseModel(nn.Module):
                         x = m(x)
             else:
                 x = m(x)  # run
-                if isinstance(m, (DecomNet1, DecomNet2)):
-                    x = list(x)
-                    for i in range(len(x)):
-                        # Freeze the DecomNet during training
-                        x[i] = x[i].detach() 
 
                 if isinstance(m, DecomNet2): 
                     if x[0].size(0) > 1 and not self.print:

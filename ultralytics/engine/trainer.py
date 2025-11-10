@@ -674,23 +674,6 @@ class BaseTrainer:
         for module_name, module in model.named_modules():
             for param_name, param in module.named_parameters(recurse=False):
                 fullname = f'{module_name}.{param_name}' if module_name else param_name
-####----------------------------------------------------------------------------------------####
-                # #########
-                # if 'model.2.' in fullname:
-                #     param.requires_grad_(False)
-                ########
-                if 'model.2.' in fullname and type(model.model[2]).__name__ == 'DecomNet1' :
-                    param.requires_grad_(False)
-                elif 'model.2.' in fullname and type(model.model[2]).__name__ == 'DecomNet2' :
-                    param.requires_grad_(False)
-                elif 'model.9.' in fullname and type(model.model[9]).__name__ == 'DecomNet2' :
-                    param.requires_grad_(False)
-                ########
-                # if 'model.2.' in fullname and type(model.module.model[2]).__name__ == 'DecomNet1' :
-                #     param.requires_grad_(False)
-                # elif 'model.9.' in fullname and type(model.module.model[9]).__name__ == 'DecomNet2' :
-                #     param.requires_grad_(False)
-####----------------------------------------------------------------------------------------####
                 if 'bias' in fullname:  # bias (no decay)
                     g[2].append(param)
                 elif isinstance(module, bn):  # weight (no decay)

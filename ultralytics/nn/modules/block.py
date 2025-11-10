@@ -165,10 +165,10 @@ class DecomNet2(nn.Module):
             params[newk] = v
         self.load_state_dict(params)
 
+    @torch.no_grad()
     def forward(self, input_im):
         b,c,h,w = input_im.shape
-        x_im = input_im
-        x_new = input_im.clone()
+        x_im = input_im.detach()
         input_max= torch.max(input_im, dim=1, keepdim=True)[0]
         input_img= torch.cat((input_max, input_im), dim=1)
         feats0   = self.net1_conv0(input_img)
