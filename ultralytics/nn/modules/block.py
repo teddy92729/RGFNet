@@ -174,15 +174,15 @@ class DecomNet2(nn.Module):
         featss   = self.net1_convs(feats0)
         outs     = self.net1_recon(featss)
         R        = torch.sigmoid(outs[:, 0:3, :, :])
-        K        = torch.ones(b)
+        L        = torch.sigmoid(outs[:, 3:4, :, :])
 
-        mask = (input_im < 0.196).float().sum(dim=[1,2,3]) > (0.18 * (h*w*3))
-        K[mask] = 0
+        mask = (L < 0.196).float().mean(dim=[1,2,3]) > 0.18
+        K = (mask == False).float()
 
         mask = mask.unsqueeze(1).unsqueeze(2).unsqueeze(3).expand_as(input_im)
-        x_im = torch.where(mask, input_im, R)
+        x_im = torch.where(mask, R, input_im)
        
-        light = (x_im, K, R)
+        light = (x_im, K, R, L)
         return light
 
   
