@@ -177,7 +177,7 @@ class DecomNet2(nn.Module):
         L        = torch.sigmoid(outs[:, 3:4, :, :])
 
         mask = (L < 0.196).float().mean(dim=[1,2,3]) > 0.18
-        K = (mask == False).float()
+        K = (~mask).float()
 
         mask = mask.unsqueeze(1).unsqueeze(2).unsqueeze(3).expand_as(input_im)
         x_im = torch.where(mask, R, input_im)
@@ -3088,7 +3088,7 @@ class mutual_alignment2(pl.LightningModule):
         # return aligned_feat_ir, aligned_feat_rgb  #, offset_feat  # 8 128 80 80
 
 ###！！！双向对齐，相互偏移！！！  可见光先为参考帧  ###
-class mutual_align1(pl.LightningModule):
+class mutual_align1(nn.Module):
     def __init__(self, dim=64, stride=1, type='group_conv'):
         
         super(mutual_align1, self).__init__()
